@@ -4,16 +4,22 @@ import React from 'react'
 import { Form, FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { useForm } from 'react-hook-form'
-
-
+import { Button } from '@/components/ui/button'
+import { signUpSchema } from '@/schemas'
+import { z } from 'zod'
+import { createUser } from '@/actions'
 const SignUp = () => {
-   const form= useForm({
+   const form= useForm<z.infer<typeof signUpSchema>>({
         defaultValues:{
             name:'',
             email:'',
             password:''
         }
     })
+    async function onSubmit (values: z.infer<typeof signUpSchema>) {
+        const result = await createUser(values)
+        return result.status === "error" ? console.log(result.message): console.log(result.message)
+    }
   return (
     <div className='flex min-h-screen items-center justify-center bg-gray-100'>
         <Card className='w-full max-w-md p-6 shadow-lg'>
@@ -22,15 +28,19 @@ const SignUp = () => {
             </CardHeader>
             <CardContent>
                <Form {...form}>
-                <form className='space-y-4'>
+                <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className='space-y-4'>
                     <div>
-                        <FormField name='name' render={(filed) =>(
+                        <FormField name='name'
+                        control={form.control}
+                        render={(filed) =>(
 
                             <div>
                                 <FormItem>
                                     <FormLabel>Name</FormLabel>
                                     <FormControl>
-                                        <Input 
+                                        <Input
                                         type='text'
                                         placeholder='Enter your name' {...filed}/>
                                     </FormControl>
@@ -39,7 +49,9 @@ const SignUp = () => {
                         )} />
                     </div>  
                     <div>
-                        <FormField name='email' render={(filed) =>(
+                        <FormField name='email' 
+                        control={form.control}
+                        render={(filed) =>(
 
                             <div>
                                 <FormItem>
@@ -54,13 +66,15 @@ const SignUp = () => {
                         )} />
                     </div>
                     <div>
-                        <FormField name='password' render={(filed) =>(
+                        <FormField name='password' 
+                        control={form.control}
+                        render={(filed) =>(
 
                             <div>
                                 <FormItem>
                                     <FormLabel>Password</FormLabel>
                                     <FormControl>
-                                        <Input 
+                                        <Input
                                         type='password'
                                         placeholder='Enter your password' {...filed}/>
                                     </FormControl>
@@ -68,7 +82,7 @@ const SignUp = () => {
                             </div>
                         )} />
                     </div>
-                    
+                    <Button className='w-full' type='submit' disabled={form.formState.isSubmitting}>Sign Up</Button>
                 </form>
                </Form>
             </CardContent>
